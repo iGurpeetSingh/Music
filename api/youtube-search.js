@@ -18,8 +18,8 @@ export default async function handler(req, res) {
     const params = new URLSearchParams({
       part: 'snippet',
       type: 'video',
-      videoCategoryId: '10',
       maxResults: '25',
+      regionCode: 'IN',
       q: query,
       key: apiKey
     });
