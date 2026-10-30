@@ -42,7 +42,8 @@ export default function App() {
   const [searchError, setSearchError] = useState('');
   const [nowPlaying, setNowPlaying] = useState(null);
   const [youtubePlaying, setYoutubePlaying] = useState(true);
-  const audioRef = useRef(null);\n  const youtubeFrameRef = useRef(null);
+  const audioRef = useRef(null);
+  const youtubeFrameRef = useRef(null);
   const toastTimer = useRef(null);
   const currentSong = songs.find(song => song.id === currentId) || songs[0];
   const activeYoutubeIndex = youtubeResults.findIndex(song => nowPlaying && song.id === nowPlaying.id);
@@ -73,6 +74,39 @@ export default function App() {
     }).catch(() => notify('Music API unavailable — demo songs are loaded.'));
     return () => { active = false; };
   }, []);
+
+  useEffect(() => {
+    const term = query.trim();
+    let cancelled = false;
+
+    if (term.length < 2) {
+      setYoutubeResults([]);
+      setSearchError('');
+      setSearchLoading(false);
+      return undefined;
+    }
+
+    setSearchLoading(true);
+    setSearchError('');
+    const timer = window.setTimeout(async () => {
+      try {
+        const results = await searchYouTubeSongs(term);
+        if (!cancelled) setYoutubeResults(results);
+      } catch (error) {
+        if (!cancelled) {
+          setYoutubeResults([]);
+          setSearchError(error.message || 'YouTube search failed. Please try again.');
+        }
+      } finally {
+        if (!cancelled) setSearchLoading(false);
+      }
+    }, 400);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [query]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -145,7 +179,17 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
-  function playYoutubeSong(song) {\n    setNowPlaying(song);\n    setYoutubePlaying(true);\n    setMobileNav(false);\n  }\n\n  function moveYoutubeSong(direction) {\n    if (!youtubeResults.length) return;\n    const next = (activeYoutubeIndex + direction + youtubeResults.length) % youtubeResults.length;\n    playYoutubeSong(youtubeResults[next]);\n  }\n\n  function playSong(song, list = null) {
+  function playYoutubeSong(song) {
+    setNowPlaying(song);
+    setYoutubePlaying(true);
+    setMobileNav(false);
+  }
+
+  function moveYoutubeSong(direction) {
+    if (!youtubeResults.length) return;
+    const next = (activeYoutubeIndex + direction + youtubeResults.length) % youtubeResults.length;
+    playYoutubeSong(youtubeResults[next]);
+  }\n\n  function playSong(song, list = null) {
     if (!song) return;
     if (list && list.length) setQueue(list.map(item => typeof item === 'string' ? item : item.id));
     if (song.id === currentId) setPlaying(value => !value);
