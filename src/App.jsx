@@ -270,7 +270,7 @@ export default function App() {
           {query.trim().length > 1 && <section className="section-block youtube-search-section">
             <div className="section-heading"><div><span className="section-kicker">YOUTUBE MUSIC SEARCH</span><h2>Results for “{query}”</h2></div><span className="youtube-result-count">{searchLoading ? 'Searching…' : youtubeResults.length + ' videos'}</span></div>
             {searchLoading && <div className="youtube-search-state"><span className="loading-spinner"/> Searching YouTube…</div>}
-            {searchError && <div className="youtube-search-state error-state">{searchError.includes('VITE_YOUTUBE_API_KEY') ? 'YouTube API key is not connected. Add VITE_YOUTUBE_API_KEY in Vercel → Project → Settings → Environment Variables, then redeploy.' : searchError}</div>}
+            {searchError && <div className="youtube-search-state error-state">{searchError.includes('YOUTUBE_API_KEY') ? 'YouTube API key is not connected. Add YOUTUBE_API_KEY in Vercel → Project → Settings → Environment Variables, then redeploy.' : searchError}</div>}
             {!searchLoading && youtubeResults.length > 0 && <div className="youtube-results-grid">{youtubeResults.map((song,index) => <button className="youtube-result-card" key={song.id} onClick={() => playYoutubeSong(song)}><div className="youtube-result-cover"><img src={song.cover} alt=""/><span className="youtube-result-play"><Play size={22} fill="currentColor"/></span><small>{String(index+1).padStart(2,'0')}</small></div><strong>{song.title}</strong><span>{song.artist}</span></button>)}</div>}
             {!searchLoading && !searchError && youtubeResults.length === 0 && <div className="youtube-search-state">No YouTube results found for this search.</div>}
           </section>}
