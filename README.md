@@ -1,6 +1,6 @@
 # Melodify — Music Dashboard
 
-Responsive React + Vite music dashboard with a demo catalogue and functional HTML audio player.
+Responsive React + Vite music dashboard with YouTube search and an immersive Now Playing screen.
 
 ## Run locally
 
@@ -9,25 +9,15 @@ npm install
 npm run dev
 ```
 
-## Features
+## YouTube Data API v3
 
-- Responsive dark dashboard for desktop, tablet and mobile
-- Search songs, artists, albums and genres
-- Play/pause, previous/next, seek, volume, shuffle and repeat
-- Favourites, queue, recently played and playlist creation
-- Demo songs and direct audio streams for initial testing
+Set `VITE_YOUTUBE_API_KEY` in Vercel → Project → Settings → Environment Variables. Select the environments you deploy to, save, and redeploy. Enable YouTube Data API v3 in Google Cloud. Restrict the key to your deployed website's HTTP referrers and to YouTube Data API v3. Do not commit the real key to source control.
 
-## Connect your music API
+Search uses YouTube Data API v3 `search.list` and returns up to 25 videos. Selecting a result opens the immersive Now Playing view with an embedded YouTube player. The spinning artwork and animated waveform are visual UI elements; actual playback is provided by YouTube's embedded player and its controls.
 
-Set `VITE_MUSIC_API_BASE_URL` in your local `.env` file. Update `src/config/api.js` response mapping if needed. The React UI expects a song array containing:
+## Optional custom music API
 
-```js
-{ id, title, artist, album, duration, cover, audioUrl, genre }
-```
-
-`audioUrl` must be a direct browser-playable audio stream, not simply a music service webpage. Your API host must allow CORS from your deployed domain. Do not place private API keys in frontend code; route private credentials through a backend or Cloudflare Worker.
-
-With no API configured, demo tracks remain available.
+Set `VITE_MUSIC_API_BASE_URL` in `.env` and adapt `src/config/api.js` if you also want a separate catalogue endpoint. The expected song shape is `{ id, title, artist, album, duration, cover, audioUrl, genre }`. Audio URLs must be direct browser-playable streams. Keep private credentials on a backend or Cloudflare Worker.
 
 ## Build
 
