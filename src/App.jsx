@@ -42,7 +42,7 @@ export default function App() {
   const [searchError, setSearchError] = useState('');
   const [nowPlaying, setNowPlaying] = useState(null);
   const [youtubePlaying, setYoutubePlaying] = useState(true);
-  const audioRef = useRef(null);
+  const audioRef = useRef(null);\n  const youtubeFrameRef = useRef(null);
   const toastTimer = useRef(null);
   const currentSong = songs.find(song => song.id === currentId) || songs[0];
   const activeYoutubeIndex = youtubeResults.findIndex(song => nowPlaying && song.id === nowPlaying.id);
@@ -312,7 +312,7 @@ export default function App() {
         <div className="now-playing-content">
           <div className="now-playing-disc-wrap"><div className={'now-playing-disc ' + (youtubePlaying ? 'disc-spinning' : '')}><img src={nowPlaying.cover} alt=""/><span className="disc-center"><AudioLines size={25}/></span></div><div className="disc-glow"/></div>
           <div className="now-playing-info"><span className="now-playing-kicker">PLAYING FROM YOUTUBE</span><h1>{nowPlaying.title}</h1><p>{nowPlaying.artist}</p></div>
-          <div className="now-playing-video"><iframe key={nowPlaying.videoId} src={'https://www.youtube-nocookie.com/embed/' + nowPlaying.videoId + '?autoplay=' + (youtubePlaying ? '1' : '0') + '&rel=0&modestbranding=1'} title={nowPlaying.title} allow="autoplay; encrypted-media; picture-in-picture; web-share" allowFullScreen/></div>
+          <div className="now-playing-video"><iframe ref={youtubeFrameRef} key={nowPlaying.videoId} src={'https://www.youtube-nocookie.com/embed/' + nowPlaying.videoId + '?autoplay=1&controls=1&enablejsapi=1&origin=' + encodeURIComponent(window.location.origin) + '&rel=0&modestbranding=1'} title={nowPlaying.title} allow="autoplay; encrypted-media; picture-in-picture; web-share" allowFullScreen/></div>
           <div className="now-playing-wave" aria-label="Music waveform">{Array.from({length:54},(_,i)=><i key={i} style={{'--bar':(12 + ((i*17)%31))+'px','--delay':(i%11)*.07+'s'}}/>)}</div>
           <div className="now-playing-controls"><button onClick={() => moveYoutubeSong(-1)} aria-label="Previous YouTube result"><SkipBack size={25} fill="currentColor"/></button><button className="now-playing-main-play" onClick={() => setYoutubePlaying(value => !value)} aria-label={youtubePlaying ? 'Pause video' : 'Play video'}>{youtubePlaying ? <Pause size={27} fill="currentColor"/> : <Play size={27} fill="currentColor"/>}</button><button onClick={() => moveYoutubeSong(1)} aria-label="Next YouTube result"><SkipForward size={25} fill="currentColor"/></button></div>
           <div className="now-playing-bottom"><span>{activeYoutubeIndex >= 0 ? 'RESULT ' + (activeYoutubeIndex+1) + ' OF ' + youtubeResults.length : 'YOUTUBE VIDEO'}</span><span>Playback controls are available in the video player above</span></div>
