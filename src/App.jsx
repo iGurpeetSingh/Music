@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Activity, Album, ArrowRight, AudioLines, Bell, ChevronDown, ChevronLeft,
   ChevronRight, CircleHelp, Compass, Disc3, Heart, Home, ListMusic, Menu,
