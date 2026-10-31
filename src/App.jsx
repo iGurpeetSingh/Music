@@ -6,7 +6,7 @@ import {
   SlidersHorizontal, Volume2, X, Ellipsis
 } from 'lucide-react';
 import { demoSongs, playlists, artists } from './data/songs';
-import { fetchSongs, searchYouTubeSongs } from './config/api';
+import { fetchSongs, searchMusicSongs } from './config/api';
 
 const navigation = [
   { title: 'MENU', links: [{ name: 'Home', icon: Home }, { name: 'Explore', icon: Compass }, { name: 'Discover', icon: Activity }, { name: 'Albums', icon: Album }] },
@@ -43,7 +43,7 @@ export default function App() {
   const [nowPlaying, setNowPlaying] = useState(null);
   const [youtubePlaying, setYoutubePlaying] = useState(true);
   const audioRef = useRef(null);
-  const youtubeFrameRef = useRef(null);
+  const saavnAudioRef = useRef(null);
   const toastTimer = useRef(null);
   const currentSong = songs.find(song => song.id === currentId) || songs[0];
   const activeYoutubeIndex = youtubeResults.findIndex(song => nowPlaying && song.id === nowPlaying.id);
@@ -90,7 +90,7 @@ export default function App() {
     setSearchError('');
     const timer = window.setTimeout(async () => {
       try {
-        const results = await searchYouTubeSongs(term);
+        const results = await searchMusicSongs(term);
         if (!cancelled) setYoutubeResults(results);
       } catch (error) {
         if (!cancelled) {
@@ -184,6 +184,16 @@ export default function App() {
     setYoutubePlaying(true);
     setMobileNav(false);
   }
+
+  useEffect(() => {
+    const audio = saavnAudioRef.current;
+    if (!audio || !nowPlaying?.audioUrl) return;
+    audio.load();
+    audio.play().then(() => setYoutubePlaying(true)).catch(() => {
+      setYoutubePlaying(false);
+      notify('This track could not be played. Try another result.');
+    });
+  }, [nowPlaying?.id, nowPlaying?.audioUrl]);
 
   function moveYoutubeSong(direction) {
     if (!youtubeResults.length) return;
@@ -312,11 +322,11 @@ export default function App() {
 
 
           {query.trim().length > 1 && <section className="section-block youtube-search-section">
-            <div className="section-heading"><div><span className="section-kicker">YOUTUBE MUSIC SEARCH</span><h2>Results for “{query}”</h2></div><span className="youtube-result-count">{searchLoading ? 'Searching…' : youtubeResults.length + ' videos'}</span></div>
-            {searchLoading && <div className="youtube-search-state"><span className="loading-spinner"/> Searching YouTube…</div>}
-            {searchError && <div className="youtube-search-state error-state">{searchError.includes('YOUTUBE_API_KEY') ? 'YouTube API key is not connected. Add YOUTUBE_API_KEY in Vercel → Project → Settings → Environment Variables, then redeploy.' : searchError}</div>}
+            <div className="section-heading"><div><span className="section-kicker">MUSIC SEARCH</span><h2>Results for “{query}”</h2></div><span className="youtube-result-count">{searchLoading ? 'Searching…' : youtubeResults.length + ' songs'}</span></div>
+            {searchLoading && <div className="youtube-search-state"><span className="loading-spinner"/> Searching songs…</div>}
+            {searchError && <div className="youtube-search-state error-state">{searchError}</div>}
             {!searchLoading && youtubeResults.length > 0 && <div className="youtube-results-grid">{youtubeResults.map((song,index) => <button className="youtube-result-card" key={song.id} onClick={() => playYoutubeSong(song)}><div className="youtube-result-cover"><img src={song.cover} alt=""/><span className="youtube-result-play"><Play size={22} fill="currentColor"/></span><small>{String(index+1).padStart(2,'0')}</small></div><strong>{song.title}</strong><span>{song.artist}</span></button>)}</div>}
-            {!searchLoading && !searchError && youtubeResults.length === 0 && <div className="youtube-search-state">No YouTube results found for this search.</div>}
+            {!searchLoading && !searchError && youtubeResults.length === 0 && <div className="youtube-search-state">No playable songs found for this search.</div>}
           </section>}
 \n          <section className="section-block songs-section">
             <div className="section-heading"><div><span className="section-kicker">{isHome ? 'THE SOUND OF NOW' : 'YOUR MUSIC'}</span><h2>{(activePlaylist && activePlaylist.title) || (isHome ? 'Trending this week' : (query ? 'Search results' : view))}</h2></div><button className="text-link" onClick={() => { setQuery(''); setActivePlaylist(null); chooseView('Explore'); }}>Browse all <ChevronRight size={16}/></button></div>
@@ -355,11 +365,11 @@ export default function App() {
         <div className="now-playing-top"><button className="now-playing-back" onClick={() => setNowPlaying(null)}><ChevronDown size={23}/><span>BACK TO MUSIC</span></button><span className="now-playing-label">NOW PLAYING</span><button className="now-playing-more" onClick={() => notify('Playing from YouTube') }><Ellipsis/></button></div>
         <div className="now-playing-content">
           <div className="now-playing-disc-wrap"><div className={'now-playing-disc ' + (youtubePlaying ? 'disc-spinning' : '')}><img src={nowPlaying.cover} alt=""/><span className="disc-center"><AudioLines size={25}/></span></div><div className="disc-glow"/></div>
-          <div className="now-playing-info"><span className="now-playing-kicker">PLAYING FROM YOUTUBE</span><h1>{nowPlaying.title}</h1><p>{nowPlaying.artist}</p></div>
-          <div className="now-playing-video"><iframe ref={youtubeFrameRef} key={nowPlaying.videoId} src={'https://www.youtube-nocookie.com/embed/' + nowPlaying.videoId + '?autoplay=1&controls=1&enablejsapi=1&origin=' + encodeURIComponent(window.location.origin) + '&rel=0&modestbranding=1'} title={nowPlaying.title} allow="autoplay; encrypted-media; picture-in-picture; web-share" allowFullScreen/></div>
+          <div className="now-playing-info"><span className="now-playing-kicker">PLAYING FROM JIOSAAVN</span><h1>{nowPlaying.title}</h1><p>{nowPlaying.artist}</p></div>
+          <div className="now-playing-video saavn-audio-player"><audio ref={saavnAudioRef} key={nowPlaying.id} src={nowPlaying.audioUrl} controls autoPlay preload="auto" onPlay={() => setYoutubePlaying(true)} onPause={() => setYoutubePlaying(false)} onError={() => { setYoutubePlaying(false); notify('Audio stream unavailable. Please choose another result.'); }}/></div>
           <div className="now-playing-wave" aria-label="Music waveform">{Array.from({length:54},(_,i)=><i key={i} style={{'--bar':(12 + ((i*17)%31))+'px','--delay':(i%11)*.07+'s'}}/>)}</div>
-          <div className="now-playing-controls"><button onClick={() => moveYoutubeSong(-1)} aria-label="Previous YouTube result"><SkipBack size={25} fill="currentColor"/></button><button className="now-playing-main-play" onClick={() => setYoutubePlaying(value => !value)} aria-label={youtubePlaying ? 'Pause video' : 'Play video'}>{youtubePlaying ? <Pause size={27} fill="currentColor"/> : <Play size={27} fill="currentColor"/>}</button><button onClick={() => moveYoutubeSong(1)} aria-label="Next YouTube result"><SkipForward size={25} fill="currentColor"/></button></div>
-          <div className="now-playing-bottom"><span>{activeYoutubeIndex >= 0 ? 'RESULT ' + (activeYoutubeIndex+1) + ' OF ' + youtubeResults.length : 'YOUTUBE VIDEO'}</span><span>Playback controls are available in the video player above</span></div>
+          <div className="now-playing-controls"><button onClick={() => moveYoutubeSong(-1)} aria-label="Previous YouTube result"><SkipBack size={25} fill="currentColor"/></button><button className="now-playing-main-play" onClick={() => { const audio = saavnAudioRef.current; if (!audio) return; if (audio.paused) audio.play().catch(() => notify('Could not start this song.')); else audio.pause(); }} aria-label={youtubePlaying ? 'Pause song' : 'Play song'}>{youtubePlaying ? <Pause size={27} fill="currentColor"/> : <Play size={27} fill="currentColor"/>}</button><button onClick={() => moveYoutubeSong(1)} aria-label="Next YouTube result"><SkipForward size={25} fill="currentColor"/></button></div>
+          <div className="now-playing-bottom"><span>{activeYoutubeIndex >= 0 ? 'RESULT ' + (activeYoutubeIndex+1) + ' OF ' + youtubeResults.length : 'AUDIO STREAM'}</span><span>Use the audio controls to seek and adjust playback</span></div>
         </div>
       </div>}
 \n      {toast && <div className="toast"><span className="toast-dot"/> {toast}</div>}
