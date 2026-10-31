@@ -1,4 +1,4 @@
-/** Music API configuration. YouTube searches are proxied through a Vercel serverless function so the API key stays server-side. */
+/** Music API configuration. Song search and streaming use a public, unofficial JioSaavn API through a same-origin Vercel function. */
 export const MUSIC_API_BASE_URL = import.meta.env.VITE_MUSIC_API_BASE_URL || '';
 
 export async function fetchSongs() {
@@ -9,12 +9,12 @@ export async function fetchSongs() {
   return Array.isArray(payload) ? payload : (payload.songs || payload.data || []);
 }
 
-export async function searchYouTubeSongs(searchTerm) {
+export async function searchMusicSongs(searchTerm) {
   const params = new URLSearchParams({ q: searchTerm });
-  const response = await fetch('/api/youtube-search?' + params.toString(), {
+  const response = await fetch('/api/saavn-search?' + params.toString(), {
     headers: { Accept: 'application/json' }
   });
   const payload = await response.json();
-  if (!response.ok) throw new Error(payload.error || 'YouTube search failed');
+  if (!response.ok) throw new Error(payload.error || 'Music search failed');
   return payload.items || [];
 }
