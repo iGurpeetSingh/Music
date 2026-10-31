@@ -4,7 +4,7 @@ function firstLink(list) {
     const score = value => parseInt(String(value?.quality || '').match(/\d+/)?.[0] || '0', 10);
     return score(b) - score(a);
   });
-  return ranked.find(item => item?.link)?.link || '';
+  return ranked.find(item => item?.url || item?.link)?.url || ranked.find(item => item?.url || item?.link)?.link || '';
 }
 
 function firstImage(list) {
