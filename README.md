@@ -1,6 +1,6 @@
 # Melodify — Music Dashboard
 
-Responsive React + Vite music dashboard with YouTube search and an immersive Now Playing screen.
+Responsive React + Vite music dashboard with live song search and an immersive Now Playing screen.
 
 ## Run locally
 
@@ -9,15 +9,15 @@ npm install
 npm run dev
 ```
 
-## YouTube Data API v3
+## Music search and playback
 
-Set `VITE_YOUTUBE_API_KEY` in Vercel → Project → Settings → Environment Variables. Select the environments you deploy to, save, and redeploy. Enable YouTube Data API v3 in Google Cloud. Restrict the key to your deployed website's HTTP referrers and to YouTube Data API v3. Do not commit the real key to source control.
+Song search is served through the Vercel serverless route `/api/saavn-search`. It uses the public, unofficial JioSaavn-compatible API and returns song title, artist, artwork, and available audio stream URLs. Selecting a result opens the full-screen player and plays the returned audio stream using the browser's native audio element.
 
-Search uses YouTube Data API v3 `search.list` and returns up to 25 videos. Selecting a result opens the immersive Now Playing view with an embedded YouTube player. The spinning artwork and animated waveform are visual UI elements; actual playback is provided by YouTube's embedded player and its controls.
+No YouTube API key or Vercel environment variable is required for this integration. The upstream service is unofficial and may occasionally be unavailable or change its response format; the server route includes a secondary provider fallback.
 
-## Optional custom music API
+## Optional custom music catalogue
 
-Set `VITE_MUSIC_API_BASE_URL` in `.env` and adapt `src/config/api.js` if you also want a separate catalogue endpoint. The expected song shape is `{ id, title, artist, album, duration, cover, audioUrl, genre }`. Audio URLs must be direct browser-playable streams. Keep private credentials on a backend or Cloudflare Worker.
+Set `VITE_MUSIC_API_BASE_URL` in `.env` if you also want a separate catalogue endpoint. Expected song shape: `{ id, title, artist, album, duration, cover, audioUrl, genre }`. Audio URLs must be direct browser-playable streams. Keep private credentials on a backend or Cloudflare Worker.
 
 ## Build
 
